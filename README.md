@@ -84,6 +84,18 @@ All other processors maintain their base rates with ±3% random noise.
 
 ---
 
+## How the Operations Team Uses This Dashboard During an Incident
+
+When AeroSur's checkout abandonment rate spikes unexpectedly, the operations team opens this dashboard as their first line of investigation. The workflow is designed for high-stress, time-sensitive scenarios where every second of confusion translates directly into lost revenue.
+
+**First 10 seconds — triage:** The four processor cards are the immediate focal point. Large authorization rate numbers color-coded in green, orange, or red let an operator determine which processor is struggling before reading a single label. If any processor is below threshold, a red alert banner at the top of the screen surfaces the issue proactively — the operator doesn't need to scan every card. In a real incident at 2 AM, this matters.
+
+**Next 60 seconds — scope assessment:** The operator clicks the affected processor card to open the drill-down panel. The status breakdown boxes (Approved / Declined / Failed / Pending) immediately reveal the failure mode: a spike in Failed suggests a connectivity or timeout issue; a spike in Declined suggests a processor-side rule change or fraud filter misconfiguration; a spike in Pending suggests a slow response queue. The live transaction table shows individual latency values — if Processor B is showing 1,800ms per transaction, that confirms a latency crisis, not just a rate anomaly.
+
+**Next 2 minutes — timeline correlation:** The trend chart answers the critical question: *when did this start?* The operator can see whether the degradation began 30 seconds ago (likely a transient blip) or 3 minutes ago (a sustained incident requiring escalation). The elapsed-time X-axis labels make it straightforward to correlate the dashboard timeline with deployment logs or external incident reports.
+
+**Decision point — escalation or watch:** If the trend line shows recovery already beginning, the operator may choose to monitor. If auth rate is still falling, they escalate to the payment processor's support line and consider routing traffic to a backup processor — a capability this prototype intentionally flags as a future addition.
+
 ## Trade-offs & What I'd Do With More Time
 
 - **Real transaction stream**: Replace the simulator with a WebSocket connection to a real payment processor event bus
