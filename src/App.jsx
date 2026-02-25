@@ -16,7 +16,7 @@ export default function App() {
   const [selectedProcessor, setSelectedProcessor] = useState(null);
   const [showSettings, setShowSettings]       = useState(false);
 
-  const { transactions, history, metrics, totalCount, elapsedSeconds } = useSimulation(thresholds);
+  const { transactions, history, metrics, totalCount, elapsedSeconds, initialized } = useSimulation(thresholds);
 
   const alerts = PROCESSORS.filter(
     p => metrics[p.id] && (metrics[p.id].health === 'degraded' || metrics[p.id].health === 'critical')
@@ -78,16 +78,19 @@ export default function App() {
           gap: 16,
           marginBottom: 20,
         }}>
-          {PROCESSORS.map(p => (
-            <ProcessorCard
-              key={p.id}
-              processor={p}
-              metrics={metrics[p.id]}
-              history={history[p.id]}
-              isSelected={selectedProcessor === p.id}
-              onClick={() => handleCardClick(p.id)}
-            />
-          ))}
+          {!initialized
+            ? PROCESSORS.map(p => <SkeletonCard key={p.id} name={p.name} method={p.method} />)
+            : PROCESSORS.map(p => (
+                <ProcessorCard
+                  key={p.id}
+                  processor={p}
+                  metrics={metrics[p.id]}
+                  history={history[p.id]}
+                  isSelected={selectedProcessor === p.id}
+                  onClick={() => handleCardClick(p.id)}
+                />
+              ))
+          }
         </section>
 
         {/* Trend Chart */}
@@ -121,6 +124,36 @@ export default function App() {
         AeroSur Checkout Health Monitor &mdash; powered by{' '}
         <span style={{ color: COLORS.primaryBlue, fontWeight: 600 }}>YUNO</span>
       </footer>
+    </div>
+  );
+}
+
+function SkeletonCard({ name, method }) {
+  return (
+    <div style={{
+      backgroundColor: COLORS.white,
+      borderRadius: 12,
+      border: `2px solid ${COLORS.gray200}`,
+      overflow: 'hidden',
+      fontFamily: FONT,
+    }}>
+      <div style={{ height: 4, backgroundColor: COLORS.gray200 }} />
+      <div style={{ padding: '16px 18px' }}>
+        <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.black, marginBottom: 4 }}>{name}</div>
+        <div style={{
+          display: 'inline-block', fontSize: 11, color: COLORS.gray400,
+          backgroundColor: COLORS.gray100, padding: '2px 8px', borderRadius: 10, marginBottom: 16,
+        }}>
+          {method}
+        </div>
+        <div style={{
+          width: '60%', height: 40, backgroundColor: COLORS.gray100,
+          borderRadius: 6, marginBottom: 8, animation: 'pulse 1.5s ease-in-out infinite',
+        }} />
+        <div style={{ fontSize: 11, color: COLORS.gray400, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          Initializing...
+        </div>
+      </div>
     </div>
   );
 }

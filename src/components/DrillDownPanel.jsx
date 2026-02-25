@@ -49,8 +49,10 @@ export default function DrillDownPanel({ processor, transactions, metrics, onClo
         </div>
         <button
           onClick={onClose}
+          onMouseEnter={e => { e.currentTarget.style.backgroundColor = COLORS.gray100; e.currentTarget.style.borderColor = COLORS.gray300; }}
+          onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.borderColor = COLORS.gray200; }}
           style={{
-            background: 'none',
+            background: 'transparent',
             border: `1px solid ${COLORS.gray200}`,
             borderRadius: 6,
             padding: '4px 12px',
@@ -58,6 +60,7 @@ export default function DrillDownPanel({ processor, transactions, metrics, onClo
             fontSize: 12,
             color: COLORS.gray600,
             fontFamily: FONT,
+            transition: 'background-color 0.15s ease, border-color 0.15s ease',
           }}
         >
           Close

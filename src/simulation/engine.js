@@ -49,11 +49,12 @@ const INITIAL_HIST_STATE = {
 };
 
 export function useSimulation(thresholds) {
-  const [transactions, setTransactions]   = useState(INITIAL_TX_STATE);
-  const [history, setHistory]             = useState(INITIAL_HIST_STATE);
-  const [metrics, setMetrics]             = useState({});
-  const [totalCount, setTotalCount]       = useState(0);
+  const [transactions, setTransactions]     = useState(INITIAL_TX_STATE);
+  const [history, setHistory]               = useState(INITIAL_HIST_STATE);
+  const [metrics, setMetrics]               = useState({});
+  const [totalCount, setTotalCount]         = useState(0);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [initialized, setInitialized]       = useState(false);
 
   const startTimeRef   = useRef(Date.now());
   const txBufferRef    = useRef({ 'processor-a': [], 'processor-b': [], 'pix-provider': [], 'oxxo-provider': [] });
@@ -92,6 +93,7 @@ export function useSimulation(thresholds) {
       totalCountRef.current += newTotal;
       setTransactions({ ...txBufferRef.current });
       setTotalCount(totalCountRef.current);
+      setInitialized(true);
     }, 2500);
 
     return () => clearInterval(interval);
@@ -103,15 +105,17 @@ export function useSimulation(thresholds) {
       const elapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
       setElapsedSeconds(elapsed);
 
-      const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false });
+      const m = Math.floor(elapsed / 60);
+      const s = elapsed % 60;
+      const timestamp = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 
       setHistory(prev => {
         const next = {};
         PROCESSORS.forEach(processor => {
-          const m = calculateMetrics(txBufferRef.current[processor.id]);
+          const pm = calculateMetrics(txBufferRef.current[processor.id]);
           next[processor.id] = [
             ...prev[processor.id],
-            { timestamp, authRate: m.authRate },
+            { timestamp, authRate: pm.authRate },
           ].slice(-120);
         });
         return next;
@@ -134,5 +138,5 @@ export function useSimulation(thresholds) {
     setMetrics(newMetrics);
   }, [transactions, thresholds]);
 
-  return { transactions, history, metrics, totalCount, elapsedSeconds };
+  return { transactions, history, metrics, totalCount, elapsedSeconds, initialized };
 }

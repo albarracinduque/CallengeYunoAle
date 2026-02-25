@@ -15,8 +15,11 @@ function Sparkline({ data, health }) {
   const points = data.slice(-20);
   const W = 120, H = 36;
   const rates = points.map(p => p.authRate);
-  const min = Math.min(...rates, 0);
-  const max = Math.max(...rates, 100);
+  const dataMin = Math.min(...rates);
+  const dataMax = Math.max(...rates);
+  const padding = Math.max((dataMax - dataMin) * 0.15, 3); // visual breathing room
+  const min = Math.max(0,   dataMin - padding);
+  const max = Math.min(100, dataMax + padding);
   const range = max - min || 1;
 
   const coords = points
