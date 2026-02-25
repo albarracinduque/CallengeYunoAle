@@ -73,7 +73,7 @@ export default function Header({
 
           <button onClick={onExport} style={btnStyle(COLORS.white, false)}>
             <ExportIcon color={COLORS.gray600} />
-            Export Snapshot
+            Export CSV
           </button>
         </div>
       </header>

@@ -23,29 +23,39 @@ export default function App() {
   );
 
   const handleExport = useCallback(() => {
-    const snapshot = {
-      exportedAt: new Date().toISOString(),
-      elapsedSeconds,
-      totalTransactions: totalCount,
-      processors: PROCESSORS.map(p => ({
-        id: p.id,
-        name: p.name,
-        method: p.method,
-        metrics: metrics[p.id] || {},
-      })),
-      activeAlerts: alerts.map(p => ({
-        id: p.id,
-        name: p.name,
-        health: metrics[p.id]?.health,
-        authRate: metrics[p.id]?.authRate,
-      })),
-    };
+    const exportedAt = new Date().toISOString();
+    const rows = [
+      ['AeroSur Checkout Health Monitor — Snapshot Export'],
+      [`Exported At,${exportedAt}`],
+      [`Elapsed (s),${elapsedSeconds}`],
+      [`Total Transactions,${totalCount}`],
+      [],
+      ['Processor', 'Method', 'Health', 'Auth Rate (%)', 'Avg Latency (ms)', 'Total', 'Approved', 'Declined', 'Failed', 'Pending', 'Alert'],
+      ...PROCESSORS.map(p => {
+        const m = metrics[p.id] || {};
+        const isAlert = alerts.some(a => a.id === p.id);
+        return [
+          p.name,
+          p.method,
+          m.health || 'healthy',
+          m.authRate ?? '',
+          m.avgLatency ?? '',
+          m.total ?? '',
+          m.approved ?? '',
+          m.declined ?? '',
+          m.failed ?? '',
+          m.pending ?? '',
+          isAlert ? 'YES' : 'no',
+        ];
+      }),
+    ];
 
-    const blob = new Blob([JSON.stringify(snapshot, null, 2)], { type: 'application/json' });
+    const csv  = rows.map(r => r.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement('a');
     a.href     = url;
-    a.download = `aerosur-snapshot-${Date.now()}.json`;
+    a.download = `aerosur-snapshot-${Date.now()}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   }, [metrics, totalCount, elapsedSeconds, alerts]);
